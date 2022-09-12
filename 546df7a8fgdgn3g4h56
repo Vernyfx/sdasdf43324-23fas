@@ -37,33 +37,64 @@ for i,v in ipairs(game:GetService("Workspace"):WaitForChild("Comets"):GetChildre
     end
 end
 
-_G.FarmSelected = false
-_G.AutoCoins = false
-_G.AutoEgg = false
-_G.SelectedWorld = "Demon Village"
-_G.SelectedMob = "Weak Demon"
-_G.SelectedEgg = "Slayer Pod"
-_G.Autoequipbestsword = false
-_G.Autoequipbestpet = false
-_G.Dofarm = true
-_G.Autotrial = false
-_G.Autocomet = false
-_G.TpBackLength = 0
-_G.PickupCoinDelay = 0.3
-_G.AutoClaimUpgrades = false
-_G.TweenSpeed = 0.5
-_G.FarmSelectedWorldValue = "Demon Village"
-_G.FarmSelectedWorld = false
 
+
+
+_G.A = {
+    FarmSelected = false,
+    AutoCoins = false,
+    AutoEgg = false,
+    SelectedWorld = "Demon Village",
+    SelectedMob = "Weak Demon",
+    SelectedEgg = "Slayer Pod",
+    Autoequipbestsword = false,
+    Autoequipbestpet = false,
+    Dofarm = true,
+    Autotrial = false,
+    Autocomet = false,
+    TpBackLength = 0,
+    PickupCoinDelay = 0.3,
+    AutoClaimUpgrades = false,
+    TweenSpeed = 0.5,
+    FarmSelectedWorldValue = "Demon Village",
+    FarmSelectedWorld = false
+}
+
+local loadSettings = function()
+    local HS = game:GetService("HttpService")
+    if readfile and isfile and isfile("AHS "..game.Players.LocalPlayer.Name..".json") then
+        _G.A = HS:JSONDecode(readfile("AHS "..game.Players.LocalPlayer.Name..".json"))
+    end
+    if readfile and isfile and isfile("AHS-Comets "..game.Players.LocalPlayer.Name..".json") then
+        _G.Cometworlds = HS:JSONDecode(readfile("AHS-Comets "..game.Players.LocalPlayer.Name..".json"))
+    end
+end
+
+loadSettings()
+
+local updJS = function()
+    local j
+    local HS = game:GetService("HttpService")
+    if writefile then
+        d = HS:JSONEncode(_G.A)
+        writefile("AHS "..game.Players.LocalPlayer.Name..".json",d)
+    end
+    if writefile then
+        d = HS:JSONEncode(_G.Cometworlds)
+        writefile("AHS-Comets "..game.Players.LocalPlayer.Name..".json",d)
+    end
+end
 
 
 Farm:AddToggle({
     Name = "Auto Farm Selected",
-    Value = _G.FarmSelected,
+    Value = _G.A.FarmSelected,
     Callback = function(newValue)
-        _G.FarmSelected = newValue
+        _G.A.FarmSelected = newValue
+        updJS()
     end
 })
+
 
 local CoinsSection = AutoFarmTab:CreateSection({
     Name = "Coin",
@@ -72,9 +103,10 @@ local CoinsSection = AutoFarmTab:CreateSection({
 
 CoinsSection:AddToggle({
     Name = "Auto Collect Coins",
-    Value = _G.AutoCoins,
+    Value = _G.A.AutoCoins,
     Callback = function(newValue)
-        _G.AutoCoins = newValue
+        _G.A.AutoCoins = newValue
+        updJS()
     end
 })
 
@@ -82,9 +114,10 @@ CoinsSection:AddSlider({
     Name = "Auto Coin Delay",
     Min = 0.01,
     Max = 1,
-    Value = _G.PickupCoinDelay,
+    Value = _G.A.PickupCoinDelay,
     Callback = function(newValue)
-        _G.PickupCoinDelay = newValue
+        _G.A.PickupCoinDelay = newValue
+        updJS()
     end
 })
 
@@ -94,9 +127,10 @@ CoinsSection:AddLabel({
 
 CoinsSection:AddToggle({
     Name = "Tween To Coins",
-    Value = _G.SafeAutoCoins,
+    Value = _G.A.SafeAutoCoins,
     Callback = function(newValue)
-        _G.SafeAutoCoins = newValue
+        _G.A.SafeAutoCoins = newValue
+        updJS()
     end
 })
 
@@ -104,9 +138,10 @@ CoinsSection:AddSlider({
     Name = "Tween Length",
     Min = 0.01,
     Max = 1,
-    Value = _G.TweenSpeed,
+    Value = _G.A.TweenSpeed,
     Callback = function(newValue)
-        _G.TweenSpeed = newValue
+        _G.A.TweenSpeed = newValue
+        updJS()
     end
 })
 
@@ -122,10 +157,11 @@ end
 
 local levelDrop = Farm:AddSearchBox({
     Name = "Select Mob",
-    Value = _G.SelectedMob,
+    Value = _G.A.SelectedMob,
     List = mobs,
     Callback = function(newValue)
-        _G.SelectedMob = newValue
+        _G.A.SelectedMob = newValue
+        updJS()
     end
 })
 
@@ -133,9 +169,10 @@ Farm:AddSlider({
     Name = "TP Offset",
     Min = 0,
     Max = 15,
-    Value = _G.TpBackLength,
+    Value = _G.A.TpBackLength,
     Callback = function(newValue)
-        _G.TpBackLength = newValue
+        _G.A.TpBackLength = newValue
+        updJS()
     end
 })
 
@@ -143,18 +180,20 @@ Farm:AddLabel({Name = "Other"})
 
 Farm:AddToggle({
     Name = "Farm Selected World",
-    Value = _G.FarmSelectedWorld,
+    Value = _G.A.FarmSelectedWorld,
     Callback = function(newValue)
-        _G.FarmSelectedWorld = newValue
+        _G.A.FarmSelectedWorld = newValue
+        updJS()
     end
 })
 
 Farm:AddSearchBox({
     Name = "Select World To Farm",
     List = worlds,
-    Value = _G.FarmSelectedWorldValue,
+    Value = _G.A.FarmSelectedWorldValue,
     Callback = function(newValue)
-        _G.FarmSelectedWorldValue = newValue
+        _G.A.FarmSelectedWorldValue = newValue
+        updJS()
     end
 })
 
@@ -172,18 +211,20 @@ local Egg = AutoFarmTab:CreateSection({
 
 Egg:AddToggle({
     Name = "Auto Buy Egg",
-    Value = _G.AutoEgg,
+    Value = _G.A.AutoEgg,
     Callback = function(newValue)
-        _G.AutoEgg = newValue
+        _G.A.AutoEgg = newValue
+        updJS()
     end
 })
 
 Egg:AddSearchBox({
     Name = "Select Egg",
-    Value = _G.SelectedEgg,
+    Value = _G.A.SelectedEgg,
     List = eggs,
     Callback = function(newValue)
-        _G.SelectedEgg = newValue
+        _G.A.SelectedEgg = newValue
+        updJS()
     end
 })
 
@@ -201,9 +242,10 @@ end)
 
 trial:AddToggle({
     Name = "Auto Time Trial",
-    Value = _G.Autotrial,
+    Value = _G.A.Autotrial,
     Callback = function(newValue)
-        _G.Autotrial = newValue
+        _G.A.Autotrial = newValue
+        updJS()
     end
 })
 
@@ -213,9 +255,10 @@ local comet = AutoFarmTab:CreateSection({
 
 comet:AddToggle({
     Name = "Auto Comet",
-    Value = _G.Autocomet,
+    Value = _G.A.Autocomet,
     Callback = function(newValue)
-        _G.Autocomet = newValue
+        _G.A.Autocomet = newValue
+        updJS()
     end
 })
 
@@ -229,6 +272,7 @@ for i = 1, #_G.Cometworlds2 do
         Value = _G.Cometworlds[_G.Cometworlds2[i]],
         Callback = function(newValue)
             _G.Cometworlds[_G.Cometworlds2[i]] = newValue
+            updJS()
         end
     })
 end
@@ -240,25 +284,28 @@ local misc = AutoFarmTab:CreateSection({
 
 misc:AddToggle({
     Name = "Auto Equip Best Sword",
-    Value = _G.Autoequipbestsword,
+    Value = _G.A.Autoequipbestsword,
     Callback = function(newValue)
-        _G.Autoequipbestsword = newValue
+        _G.A.Autoequipbestsword = newValue
+        updJS()
     end
 })
 
 misc:AddToggle({
     Name = "Auto Equip Best Pets",
-    Value = _G.Autoequipbestpet,
+    Value = _G.A.Autoequipbestpet,
     Callback = function(newValue)
-        _G.Autoequipbestpet = newValue
+        _G.A.Autoequipbestpet = newValue
+        updJS()
     end
 })
 
 misc:AddToggle({
     Name = "Auto Claim Upgrades",
-    Value = _G.AutoClaimUpgrades,
+    Value = _G.A.AutoClaimUpgrades,
     Callback = function(newValue)
-        _G.AutoClaimUpgrades = newValue
+        _G.A.AutoClaimUpgrades = newValue
+        updJS()
     end
 })
 
@@ -269,23 +316,26 @@ misc:AddSlider({
     Value = 16,
     Callback = function(newValue)
         game:GetService("Players").LocalPlayer.WalkSpeed.Value = newValue
+        updJS()
     end
 })
 
 _G.Doingcomet = false
+_G.Dofarm = true
+_G.Intrial = false
 
 task.spawn(function()
     while task.wait() do
         task.wait(.1)
-        if _G.FarmSelected and _G.Dofarm and not _G.Doingcomet and not _G.Intrial and not _G.FarmSelectedWorld then
+        if _G.A.FarmSelected and _G.Dofarm and not _G.Doingcomet and not _G.Intrial and not _G.A.FarmSelectedWorld then
             for i,v in pairs(game:GetService("Workspace"):FindFirstChild("Enemies"):GetDescendants()) do
-                if v.Name == _G.SelectedMob and v:FindFirstChildOfClass("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("HP") and v:FindFirstChild("HP").Value > 0 then
-                    pcall(function()
+                if v.Name == _G.A.SelectedMob and v:FindFirstChildOfClass("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("HP") and v:FindFirstChild("HP").Value > 0 then
+                    --pcall(function()
                         repeat
-                            if _G.FarmSelected and _G.Dofarm and not _G.Doingcomet and not _G.Intrial and not _G.FarmSelectedWorld then
+                            if _G.A.FarmSelected and _G.Dofarm and not _G.Doingcomet and not _G.Intrial and not _G.A.FarmSelectedWorld then
                                 repeat wait() until not _G.collectingCoins
                                 pcall(function()
-                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,_G.TpBackLength)
+                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,_G.A.TpBackLength)
                                     task.wait(.1)
                                     game:GetService("ReplicatedStorage").Remotes.WeaponRemote:FireServer(v)
                                 end)
@@ -293,10 +343,10 @@ task.spawn(function()
                                 break
                             end
                         until v:FindFirstChild("HP").Value <= 0
-                        if _G.AutoCoins or _G.SafeAutoCoins then
+                        if _G.A.AutoCoins or _G.A.SafeAutoCoins then
                             task.wait(.1)
                         end
-                    end)
+                   -- end)
 
 
                     -- not v:FindFirstChildOfClass("Humanoid") or     
@@ -307,15 +357,15 @@ task.spawn(function()
         end
         --
 
-        if _G.FarmSelectedWorld and _G.Dofarm and not _G.Doingcomet and not _G.Intrial then
-            for i,v in pairs(game:GetService("Workspace"):FindFirstChild("Enemies"):FindFirstChild(_G.FarmSelectedWorldValue):GetChildren()) do
+        if _G.A.FarmSelectedWorld and _G.Dofarm and not _G.Doingcomet and not _G.Intrial then
+            for i,v in pairs(game:GetService("Workspace"):FindFirstChild("Enemies"):FindFirstChild(_G.A.FarmSelectedWorldValue):GetChildren()) do
                 if v:FindFirstChildOfClass("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("HumanoidRootPart").CFrame ~= CFrame.new(0, -1000000, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1) and v:FindFirstChild("HP") and v:FindFirstChild("HP").Value > 0 then
                     pcall(function()
                         repeat
-                            if _G.FarmSelectedWorld and _G.Dofarm and not _G.Doingcomet and not _G.Intrial then
+                            if _G.A.FarmSelectedWorld and _G.Dofarm and not _G.Doingcomet and not _G.Intrial then
                                 repeat wait() until not _G.collectingCoins
                                 pcall(function()
-                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,_G.TpBackLength)
+                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,_G.A.TpBackLength)
                                     task.wait(.1)
                                     game:GetService("ReplicatedStorage").Remotes.WeaponRemote:FireServer(v)
                                 end)
@@ -323,7 +373,7 @@ task.spawn(function()
                                 break
                             end
                         until v:FindFirstChild("HP").Value <= 0
-                        if _G.AutoCoins or _G.SafeAutoCoins then
+                        if _G.A.AutoCoins or _G.A.SafeAutoCoins then
                             task.wait(.1)
                         end
                     end)
@@ -343,12 +393,12 @@ end)
 task.spawn(function()
     while task.wait() do
         task.wait(.1)
-        if _G.Autocomet and _G.Dofarm and not _G.Intrial  then
+        if _G.A.Autocomet and _G.Dofarm and not _G.Intrial  then
             for i,v in pairs(game:GetService("Workspace"):FindFirstChild("Comets"):GetDescendants()) do
                 if v:IsA("Model") and _G.Cometworlds[v.Parent.Name] and v:FindFirstChild("HP").Value > 0 then
                     _G.Doingcomet = true
                     repeat
-                        if _G.Autocomet and _G.Dofarm and not _G.Intrial then
+                        if _G.A.Autocomet and _G.Dofarm and not _G.Intrial then
                             repeat wait() until not _G.collectingCoins
                             pcall(function()
                                 game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.PrimaryPart.CFrame * CFrame.new(0,7,0)
@@ -372,20 +422,20 @@ task.spawn(function()
     while task.wait() do
         wait()
         if game:GetService("Workspace"):WaitForChild("TemporaryAssets"):FindFirstChild("Coin") then
-            if _G.AutoCoins or _G.SafeAutoCoins then
+            if _G.A.AutoCoins or _G.A.SafeAutoCoins then
                 _G.collectingCoins = true
             end
         else
             _G.collectingCoins = false
         end
-        if _G.AutoCoins and not _G.SafeAutoCoins then
+        if _G.A.AutoCoins and not _G.A.SafeAutoCoins then
                     for i,v in pairs(game:GetService("Workspace").TemporaryAssets:GetChildren()) do
                         if v.Name == "Coin" then
                             pcall(function()
                                     if v.PrimaryPart.CFrame ~= CFrame.new(-349.096436, 0.862822592, -52.8778076, 0, 0, 1, -1, 0, 0, 0, -1, 0) then
                                         v.PrimaryPart.CanCollide = false
                                         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.PrimaryPart.CFrame
-                                        task.wait(_G.PickupCoinDelay)
+                                        task.wait(_G.A.PickupCoinDelay)
                                     else
                                         v:Destroy()
                                     end
@@ -393,7 +443,7 @@ task.spawn(function()
                         end
                     end
         end
-        if _G.SafeAutoCoins then
+        if _G.A.SafeAutoCoins then
             for i,v in pairs(game:GetService("Workspace").TemporaryAssets:GetChildren()) do
                 if v.Name == "Coin" then
                     local TweenService = game:GetService("TweenService")
@@ -401,7 +451,7 @@ task.spawn(function()
                         if v.PrimaryPart.CFrame ~= CFrame.new(-349.096436, 0.862822592, -52.8778076, 0, 0, 1, -1, 0, 0, 0, -1, 0) then
                             v.PrimaryPart.CanCollide = false
                                 local tweenInfo = TweenInfo.new(
-                                _G.TweenSpeed, -- Time
+                                _G.A.TweenSpeed, -- Time
                                 Enum.EasingStyle.Linear, -- EasingStyle
                                 Enum.EasingDirection.Out, -- EasingDirection
                                 0, -- RepeatCount (when less than zero the tween will loop indefinitely)
@@ -410,7 +460,7 @@ task.spawn(function()
                                 )
                                 
                             local tween = TweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {CFrame = v.PrimaryPart.CFrame}):Play()
-                            task.wait(_G.TweenSpeed)
+                            task.wait(_G.A.TweenSpeed)
                         end
                     end)
                     break
@@ -422,8 +472,8 @@ end)
 
 task.spawn(function()
     while task.wait(.5) do
-        if _G.AutoEgg then
-            game:GetService("ReplicatedStorage").Remotes.OpenEgg:InvokeServer(_G.SelectedEgg,false,false)
+        if _G.A.AutoEgg then
+            game:GetService("ReplicatedStorage").Remotes.OpenEgg:InvokeServer(_G.A.SelectedEgg,false,false)
             wait(1)
         end
     end
@@ -432,7 +482,7 @@ end)
 task.spawn(function()
     while task.wait() do
         wait(5)
-        if _G.Autoequipbestsword then
+        if _G.A.Autoequipbestsword then
             local button = game:GetService("Players").LocalPlayer.PlayerGui.MainGui.Frames.Inventory.Main.Configure.EquipBest
             local events = {"MouseButton1Click", "MouseButton1Down", "Activated"}
             for i,v in pairs(events) do
@@ -441,7 +491,7 @@ task.spawn(function()
                 end
             end
         end
-        if _G.Autoequipbestpet then
+        if _G.A.Autoequipbestpet then
             local button = game:GetService("Players").LocalPlayer.PlayerGui.MainGui.Frames.Companions.Main.Configure.EquipBest
             local events = {"MouseButton1Click", "MouseButton1Down", "Activated"}
             for i,v in pairs(events) do
@@ -455,20 +505,20 @@ end)
 
 task.spawn(function()
     while task.wait() do
-        if _G.Autotrial then
-            if _G.Autotrial and not _G.Intrial then
+        if _G.A.Autotrial then
+            if _G.A.Autotrial and not _G.Intrial then
             wait(.5)
                 if not game:GetService("Players").LocalPlayer.PlayerGui.MainGui.HUD.Bottom.TimeTrialInfo.Visible then
                     local timer = game:GetService("Workspace").TimeTrial.LobbyTimer.Timer.Label
                     local a = tostring(timer.Text):split(":")
                     if a[1] == "00" then
-                        if _G.Autotrial and not _G.Intrial then
+                        if _G.A.Autotrial and not _G.Intrial then
                             pcall(function()
                                 _G.Dofarm = false
                                 _G.Doingcomet = false
                                 repeat wait(.3)
                                     repeat wait() until not _G.collectingCoins
-                                if _G.Autotrial then
+                                if _G.A.Autotrial then
                                     pcall(function()
                                         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").TimeTrial.Teleporters.LobbyDestination.CFrame
                                     end)
@@ -520,7 +570,7 @@ task.spawn(function()
                                 break
                             end
                         until tonumber(v:FindFirstChild("HP").Value) <= 0
-                        if _G.AutoCoins or _G.SafeAutoCoins then
+                        if _G.A.AutoCoins or _G.A.SafeAutoCoins then
                             task.wait(.1)
                         end
                     end)
@@ -535,7 +585,7 @@ task.spawn(function()
                         if true then
                             repeat wait() until not _G.collectingCoins
                             pcall(function()
-                                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,_G.TpBackLength)
+                                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,_G.A.TpBackLength)
                                 task.wait(.1)
                                 game:GetService("ReplicatedStorage").Remotes.WeaponRemote:FireServer(v)
                             end)
@@ -544,7 +594,7 @@ task.spawn(function()
                         end
                     until
                         tonumber(v:FindFirstChild("HP").Value) <= 0
-                        if _G.AutoCoins or _G.SafeAutoCoins then
+                        if _G.A.AutoCoins or _G.A.SafeAutoCoins then
                             task.wait(.1)
                         end
                 end)
@@ -557,7 +607,7 @@ end)
 task.spawn(function()
     while task.wait() do
         task.wait(5)
-        if _G.AutoClaimUpgrades then
+        if _G.A.AutoClaimUpgrades then
             for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.MainGui.Frames.Upgrades.Main.ScrollList:GetChildren()) do
                 pcall(function()
                     if v:FindFirstChild("ProgressLabel") and v.ProgressLabel.Text == "CLAIM" then
